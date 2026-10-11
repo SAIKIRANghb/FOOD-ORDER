@@ -71,8 +71,18 @@ public class RestaurantController {
     }
 
     @GetMapping("/count")
-    ApiResponse<Long> count() {
-        return ApiResponse.ok("Restaurants counted", restaurantRepository.count());
+    ApiResponse<Map<String, Object>> count() {
+        List<Restaurant> all = restaurantRepository.findAll();
+        long total = all.size();
+        long approved = all.stream().filter(r -> Boolean.TRUE.equals(r.getActive())).count();
+        Map<String, Object> data = new java.util.LinkedHashMap<>();
+        data.put("total", total);
+        data.put("approved", approved);
+        data.put("suspended", total - approved);
+        data.put("rejected", 0L);
+        data.put("inprogress", 0L);
+        data.put("monthlyRestaurants", com.hungrezy.foodordering.util.MonthlyCounts.of(all, "restaurants"));
+        return ApiResponse.ok("Restaurants counted", data);
     }
 
     @GetMapping("/locations")

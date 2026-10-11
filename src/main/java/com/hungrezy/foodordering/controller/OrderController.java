@@ -67,8 +67,13 @@ public class OrderController {
     }
 
     @GetMapping("/api/order/count")
-    ApiResponse<Long> count() {
-        return ApiResponse.ok("Orders counted", orderRepository.count());
+    ApiResponse<Map<String, Object>> count() {
+        long totalOrders = orderRepository.count();
+        long deliveredOrders = orderRepository.findByStatus(OrderStatus.DELIVERED);
+        return ApiResponse.ok("Orders counted", Map.of(
+                "totalOrders", totalOrders,
+                "deliveredOrders", deliveredOrders
+        ));
     }
 
     @GetMapping("/api/order/{id}")

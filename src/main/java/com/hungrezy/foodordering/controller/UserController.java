@@ -56,8 +56,17 @@ public class UserController {
     }
 
     @GetMapping("/api/user/count")
-    ApiResponse<Long> count() {
-        return ApiResponse.ok("Users counted", userRepository.count());
+    ApiResponse<Map<String, Object>> count() {
+        List<User> all = userRepository.findAll();
+        long totalUsers = all.size();
+        long activeUsers = all.stream().filter(u -> u.getStatus() == UserStatus.ACTIVE).count();
+        long inActiveUsers = totalUsers - activeUsers;
+        return ApiResponse.ok("Users counted", Map.of(
+                "totalUsers", totalUsers,
+                "activeUsers", activeUsers,
+                "inActiveUsers", inActiveUsers,
+                "monthlyUsers", com.hungrezy.foodordering.util.MonthlyCounts.of(all, "customers")
+        ));
     }
 
     @GetMapping("/api/user/all")
